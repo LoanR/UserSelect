@@ -21,19 +21,21 @@
                     <div :class="openCloseIndicator"></div>
                 </button>
             </div>
-            <ul v-if="toggleUsers" class="users-list" @mouseover="resetArrowHover" @mouseout="arrowableUsers = true">
-                <li v-for="(user, index) in users" :key="user.id" @click="userSelected(user)" class="user-container clickable" :class="{'arrow-hover': arrowHoveredItem === index}">
-                    <img :src="user.avatar">
-                    <ul>
-                        <li>
-                            {{user.first_name}}
-                        </li>
-                        <li>
-                            <strong>{{user.last_name}}</strong>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+            <transition name="slide-down-fade">
+                <ul v-if="toggleUsers" class="users-list" @mouseover="resetArrowHover" @mouseout="arrowableUsers = true">
+                    <li v-for="(user, index) in users" :key="user.id" @click="userSelected(user)" class="user-container clickable" :class="{'arrow-hover': arrowHoveredItem === index}">
+                        <img :src="user.avatar">
+                        <ul>
+                            <li>
+                                {{user.first_name}}
+                            </li>
+                            <li>
+                                <strong>{{user.last_name}}</strong>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </transition>
         </div>
 	</div>
 </template>
@@ -45,7 +47,6 @@ export default {
     data() {
         return {
             userRequest: new Request('https://reqres.in/api/users/', {method: 'GET'}),
-            users: JSON.parse(localStorage.getItem('users')),
             toggleUsers: false,
             selectedUser: null,
             arrowHoveredItem: -1,
@@ -117,6 +118,10 @@ export default {
     computed: {
         openCloseIndicator() {
             return 'arrow' + (this.toggleUsers ? ' close' : ' open');
+        },
+
+        users() {
+            return JSON.parse(localStorage.getItem('users'));
         },
     },
 
@@ -193,7 +198,16 @@ ul {
     }
 }
 
+.slide-down-fade-enter-active, .slide-down-fade-leave-active {
+    transition: all 0.3s cubic-bezier(0,0,0.3,1);
+}
+.slide-down-fade-enter, .slide-down-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-70px);
+}
+
 .users-list {
+    z-index: -1;
     background-color: #fafafa;
     max-width: 300px;
     margin: 0 10px;
